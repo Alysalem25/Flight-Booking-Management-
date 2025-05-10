@@ -5,17 +5,24 @@
 package programming.project;
 
 import java.security.Key;
+import java.awt.event.*;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  *
  * @author Aly
  */
+
+
 public class Booking {
-//     6. Booking 
-// • Responsibility: Manages booking information and status 
-// • Key Attributes: bookingReference, customer, flight, passengers, seatSelections, status, paymentStatus 
-// • Key Methods: addPassenger(), calculateTotalPrice(), confirmBooking(), cancelBooking(), 
-// generateItinerary()
+    // 6. Booking
+    // • Responsibility: Manages booking information and status
+    // • Key Attributes: bookingReference, customer, flight, passengers,
+    // seatSelections, status, paymentStatus
+    // • Key Methods: addPassenger(), calculateTotalPrice(), confirmBooking(),
+    // cancelBooking(),
+    // generateItinerary()
 
     private String bookingReference;
     private String customer;
@@ -25,7 +32,28 @@ public class Booking {
     private String status;
     private String paymentStatus;
 
-    public Booking(String bookingReference, String customer, String flight, String passengers, String seatSelections, String status, String paymentStatus) {
+    public Booking() {
+        // =================================================
+        JFrame frame = new JFrame("Login success");
+        frame.setSize(300, 200);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
+
+
+        // Password label and field
+        JLabel passLabel = new JLabel("logged in successfully");
+        passLabel.setBounds(20, 60, 150, 25);
+        frame.add(passLabel);
+
+
+        frame.setVisible(true);
+        // ===============================
+   }
+
+    
+
+    public Booking(String bookingReference, String customer, String flight, String passengers, String seatSelections,
+            String status, String paymentStatus) {
         this.bookingReference = bookingReference;
         this.customer = customer;
         this.flight = flight;
@@ -90,7 +118,5 @@ public class Booking {
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
-    
-    
 
 }

@@ -5,6 +5,9 @@
 package programming.project;
 
 import java.sql.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 /**
  *
@@ -42,9 +45,10 @@ public abstract class User {
         // Logic for user logout
     }
 
-    public void updateProfile() {
-        // Logic for updating user profile
-    }
+   public abstract void updateProfile();
+
+
+
 
     public String getUserId() {
         return userId;
@@ -84,5 +88,12 @@ public abstract class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

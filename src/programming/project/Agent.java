@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package programming.project;
 
 import java.sql.Connection;
@@ -9,21 +5,14 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-/**
- *
- * @author Aly
- */
 public class Agent extends User {
-    // 3. Agent (Extends User)
-    // • Responsibility: Manages bookings and assists customers
-    // • Key Attributes: agentId, department, commission
-    // • Key Methods: manageFlights(), createBookingForCustomer(), modifyBooking(),
-    // generateReports()
-
     private String agentId;
     private String department;
     private double commission;
+
+    private String currentUsername = null; // For session tracking
 
     public Agent() {
     }
@@ -46,8 +35,12 @@ public class Agent extends User {
             Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection(url);
             System.out.println("✅ Connected to database.");
+
             // Insert into Users
-            PreparedStatement userStmt = conn.prepareStatement(userSQL);
+            // PreparedStatement userStmt = conn.prepareStatement(userSQL,
+            // PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement userStmt = conn.prepareStatement(userSQL, Statement.RETURN_GENERATED_KEYS);
+
             userStmt.setString(1, username);
             userStmt.setString(2, password);
             userStmt.setString(3, name);
@@ -55,22 +48,23 @@ public class Agent extends User {
             userStmt.setString(5, contactInfo);
             userStmt.executeUpdate();
 
-            // Get generated user_id
             ResultSet generatedKeys = userStmt.getGeneratedKeys();
+            int userId = -1;
+
             if (generatedKeys.next()) {
-                int userId = generatedKeys.getInt(1);
-
-                // Insert into Agents table
-                PreparedStatement agentStmt = conn.prepareStatement(agentSQL);
-                agentStmt.setInt(1, userId);
-                agentStmt.setString(2, this.department);
-                agentStmt.setDouble(3, this.commission);
-                agentStmt.executeUpdate();
-
-                System.out.println("✅ Agent inserted successfully with user ID: " + userId);
+                userId = generatedKeys.getInt(1);
             } else {
-                throw new SQLException("User ID was not returned.");
+                throw new SQLException("User ID not returned.");
             }
+            // Insert into Agents
+            PreparedStatement agentStmt = conn.prepareStatement(agentSQL);
+            agentStmt.setInt(1, userId); // agent_id = user_id
+            agentStmt.setString(2, this.department);
+            agentStmt.setDouble(3, this.commission);
+            agentStmt.executeUpdate();
+
+            System.out.println("✅ Agent inserted with user ID: " + userId);
+            conn.close();
 
         } catch (Exception e) {
             System.out.println("❌ Error inserting agent: " + e.getMessage());
@@ -80,42 +74,99 @@ public class Agent extends User {
     @Override
     public boolean login(String username, String password) {
         String url = "jdbc:sqlite:D:\\Sqlite\\sqlite-tools-win-x64-3490100/users.db";
-        String sql = "SELECT u.user_id, u.username, u.name, u.email, u.contact_info, c.address, c.preferences " +
-                "FROM Users u " +
-                "JOIN Agents c ON u.user_id = c.agent_id " +
-                "WHERE u.username = ?";
+      String sql = "SELECT u.user_id, u.username, u.password, u.name, u.email, u.contact_info, " +
+             "a.department, a.commission " +
+             "FROM Users u JOIN Agents a ON u.user_id = a.user_id " +  
+             "WHERE u.username = ?";
+
         try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-            } catch (ClassNotFoundException e) {
-                System.out.println("Error loading database driver: " + e.getMessage());
-                return false;
-            }
+            Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection(url);
             System.out.println("✅ Connected to database.");
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
 
-            while (rs.next()) {
-                String nameFromData = rs.getString("name");
-                String passwordFromData = rs.getString("password");
-                System.out.println("Name: " + nameFromData + ", Password: " +
-                        passwordFromData);
-                if (username.equals(nameFromData) && password.equals(passwordFromData)) {
-                    System.out.println("Login successful for user: " + nameFromData);
-                    return true;
+            if (rs.next()) {
+                String passwordFromDB = rs.getString("password");
+                      if (password.equals(passwordFromDB)) {
+                // Set fields from DB
+                setUserId(String.valueOf(rs.getInt("user_id")));
+                setUsername(rs.getString("username"));
+                setPassword(rs.getString("password"));
+                setName(rs.getString("name"));
+                setEmail(rs.getString("email"));
+                setContactInfo(rs.getString("contact_info"));
+                setDepartment(rs.getString("department"));
+                setCommission(rs.getDouble("commission"));
 
-                } else {
-                    System.out.println("Login failed for user: " + nameFromData);
-                }
-
+                System.out.println("✅ Login successful for user: " + getName());
+                return true;
+            } else {
+                System.out.println("❌ Invalid password.");
+            }
             }
 
         } catch (SQLException e) {
-            System.out.println("Error selecting data: " + e.getMessage());
+            System.out.println("❌ Error connecting to database: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.out.println("❌ JDBC Driver not found: " + e.getMessage());
         }
         return false;
+
+        // try {
+        // Class.forName("org.sqlite.JDBC");
+        // try (Connection conn = DriverManager.getConnection(url);
+        // PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        // pstmt.setString(1, username);
+        // ResultSet rs = pstmt.executeQuery();
+
+        // while (rs.next()) {
+        // String usernameFromDB = rs.getString("username");
+        // String passwordFromDB = rs.getString("password");
+
+        // if (username.equals(usernameFromDB) && password.equals(passwordFromDB)) {
+        // this.currentUsername = usernameFromDB; // set session info
+        // System.out.println("✅ Login successful for: " + usernameFromDB);
+        // return true;
+        // }
+        // }
+        // }
+        // } catch (Exception e) {
+        // System.out.println("❌ Login error: " + e.getMessage());
+        // }
+        // return false;
+    }
+
+    public void logout() {
+        System.out.println("🔒 User " + currentUsername + " logged out.");
+        this.currentUsername = null;
+    }
+
+    @Override
+    public void updateProfile() {
+        String url = "jdbc:sqlite:D:\\Sqlite\\sqlite-tools-win-x64-3490100/users.db";
+        String sql = "UPDATE Users SET username = ?, password = ?, name = ?, email = ?, contact_info = ? WHERE username = ?";
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            try (Connection conn = DriverManager.getConnection(url);
+                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setString(1, this.getUsername());
+                pstmt.setString(2, this.getPassword());
+                pstmt.setString(3, this.getName());
+                pstmt.setString(4, this.getEmail());
+                pstmt.setString(5, this.getContactInfo());
+                pstmt.setString(6, this.currentUsername);
+                pstmt.executeUpdate();
+
+                System.out.println("✅ Profile updated for: " + this.currentUsername);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error updating profile: " + e.getMessage());
+        }
     }
 
     public String getAgentId() {

@@ -109,6 +109,11 @@ public class Administrator extends User {
     return false;
 }
 
+    @Override
+    public void updateProfile() {
+        // Logic for updating administrator profile
+        System.out.println("Updating administrator profile...");
+    }
     public String getRole() {
         return "Administrator";
     }

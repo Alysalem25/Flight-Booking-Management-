@@ -1,104 +1,179 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package programming.project;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 
-/**
- *
- * @author Aly
- */
 public class ProgrammingProject {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // Administrator a1 = new Administrator("1", "admin", "123", "name", "ema1il",
+        // Administrator a1 = new Administrator("1", "ahmed", "123", "ahmed", "ahmed",
         // "contactInfo" , "1", "high");
-        // Customer c1 = new Customer("2", "address", "preferences", "2", "username",
-        // "123", "name", "ema1il", "contactInfo");
-        // Agent a2 = new Agent("1", "admin", 123.0, "name", "ema1il",
-        // "contactInfo", "1", "high", "additionalInfo");
+        // Customer c1 = new Customer("23", "address", "preferences", "23", "baraa",
+        // "123", "baraa", "baraa", "contactInfo");
+        // Agent a2 = new Agent("22", "admin", 123.0, "22", "jana25",
+        // "123", "jana25", "jana32@gmail.com", "additionalInfo");
         // Customer c1 = new Customer("4", "address", "preferences", "4", "hazem",
         // "123", "hazem", "hazem", "contactInfo");
         Administrator a1 = new Administrator();
         Customer c1 = new Customer();
         Agent g2 = new Agent();
         Flight f1 = new Flight();
-        // =================================================
-        JFrame frame = new JFrame("Login");
-        frame.setSize(300, 200);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(null);
 
-        // Username label and text field
+        JFrame frame = new JFrame("Login");
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
+
+        frame.setSize(screenWidth, screenHeight);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // // Load and set background image
+        // ImageIcon backgroundImage = new
+        // ImageIcon(ProgrammingProject.class.getResource("/programming/project/assets/10601216_41822.jpg"));
+        // JLabel backgroundLabel = new JLabel(backgroundImage);
+        // backgroundLabel.setBounds(0, 0, 1, 1);
+        ImageIcon originalIcon = new ImageIcon(
+                ProgrammingProject.class.getResource("/programming/project/assets/10601216_41822.jpg"));
+        Image originalImage = originalIcon.getImage();
+
+        // Scale the image to fit the screen size
+        Image scaledImage = originalImage.getScaledInstance(screenWidth, screenHeight, Image.SCALE_SMOOTH);
+
+        ImageIcon backgroundImage = new ImageIcon(scaledImage);
+        JLabel backgroundLabel = new JLabel(backgroundImage);
+        backgroundLabel.setBounds(0, 0, 900, 900);
+
+        backgroundLabel.setLayout(null); // for absolute positioning
+
+        // Username label and field
+        int centerX = screenWidth / 2;
+
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setBounds(20, 20, 80, 25);
-        frame.add(userLabel);
+        userLabel.setForeground(Color.WHITE);
+        userLabel.setBounds(centerX - 150, 200, 80, 25);
+        backgroundLabel.add(userLabel);
 
         JTextField userText = new JTextField();
-        userText.setBounds(100, 20, 165, 25);
-        frame.add(userText);
+        userText.setBounds(centerX - 60, 200, 165, 25);
+        backgroundLabel.add(userText);
 
         // Password label and field
         JLabel passLabel = new JLabel("Password:");
-        passLabel.setBounds(20, 60, 80, 25);
-        frame.add(passLabel);
+        passLabel.setForeground(Color.WHITE);
+        passLabel.setBounds(centerX - 150, 240, 80, 25);
+        backgroundLabel.add(passLabel);
 
         JPasswordField passText = new JPasswordField();
-        passText.setBounds(100, 60, 165, 25);
-        frame.add(passText);
+        passText.setBounds(centerX - 60, 240, 165, 25);
+        backgroundLabel.add(passText);
 
         // Login button
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(100, 100, 80, 25);
-        frame.add(loginButton);
+        loginButton.setBounds(centerX - 30, 280, 80, 25);
+        backgroundLabel.add(loginButton);
 
-        // On button click
+        frame.setContentPane(backgroundLabel);
+
+        // Login button logic
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String username = userText.getText();
                 String password = new String(passText.getPassword());
 
-                // Call your login method
                 if (a1.login(username, password)) {
-                    String role = a1.getRole(); // Assuming you have a method to get the role
-                    JOptionPane.showMessageDialog(frame, "Login successful! Role: " + role);
-                    // Proceed to the next screen or functionality
+                    showRoleScreen(a1.getRole(), username, a1);
+
+                    frame.dispose();
                 } else if (c1.login(username, password)) {
-                    String role = c1.getRole(); // Assuming you have a method to get the role
-                    JOptionPane.showMessageDialog(frame, "Login successful! Role: " + role);
+                    showRoleScreen(c1.getRole(), username, c1);
 
-                    JButton showFlights = new JButton("Show Flights");
-                    showFlights.setBounds(120, 120, 120, 30); // Adjust size for better visibility
-                    showFlights.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            // Show flights logic here
-                            JOptionPane.showMessageDialog(frame, "Showing flights...");
-                            f1.createAndShowGUI();
-                        }
-                    });
-
-                    frame.add(showFlights);
-                    frame.revalidate(); // Refresh layout
-                    frame.repaint(); // Redraw frame
+                    frame.dispose();
                 } else if (g2.login(username, password)) {
-                    String role = g2.getRole(); // Assuming you have a method to get the role
-                    JOptionPane.showMessageDialog(frame, "Login successful! Role: " + role);
+                    showRoleScreen(g2.getRole(), username, g2);
+                    frame.dispose();
                 } else {
                     JOptionPane.showMessageDialog(frame, "Login failed! Please try again.");
                 }
+            }
+
+            private void showRoleScreen(String role, String username, User loggedInUser) {
+                JFrame dashboard = new JFrame(role + " Dashboard");
+                dashboard.setSize(400, 300);
+                dashboard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                dashboard.setLayout(new FlowLayout());
+
+                JLabel welcomeLabel = new JLabel("Welcome " + username + " (" + role + ")");
+                dashboard.add(welcomeLabel);
+
+                if (role.equalsIgnoreCase("Customer")) {
+                    JButton showFlights = new JButton("Show Flights");
+                    showFlights.addActionListener(ev -> {
+                        JOptionPane.showMessageDialog(dashboard, "Showing flights...");
+                        f1.createAndShowGUI();
+                    });
+                    dashboard.add(showFlights);
+
+                    JButton update = new JButton("Update Profile");
+                    update.addActionListener(e -> {
+                        ((Customer) loggedInUser).updateProfile();
+                    });
+                    dashboard.add(update);
+            }else if (role.equalsIgnoreCase("Agent")) {
+                    JButton manageBookings = new JButton("Manage Bookings");
+                    manageBookings.addActionListener(ev -> {
+                        JOptionPane.showMessageDialog(dashboard, "Managing bookings...");
+                    });
+                    dashboard.add(manageBookings);
+
+                    JButton addflight = new JButton("Add flight");
+                    addflight.addActionListener(ev -> {
+                        f1.addFlight();
+                    });
+                    dashboard.add(addflight);
+
+                    JButton update = new JButton("Update Profile");
+                    update.addActionListener(e -> {
+                        ((Agent) loggedInUser).updateProfile();
+                    });
+                    dashboard.add(update);
+                } else if (role.equalsIgnoreCase("Administrator")) {
+                    JButton manageUsers = new JButton("Manage Users");
+                    manageUsers.addActionListener(ev -> {
+                        JOptionPane.showMessageDialog(dashboard, "Managing users...");
+                    });
+                    dashboard.add(manageUsers);
+
+                    JButton update = new JButton("Update Profile");
+                    update.addActionListener(e -> {
+                        ((Administrator) loggedInUser).updateProfile();
+                    });
+                    dashboard.add(update);
+                } else if (role.equalsIgnoreCase("Administrator")) {
+                    JButton manageUsers = new JButton("Manage Users");
+                    manageUsers.addActionListener(ev -> {
+                        JOptionPane.showMessageDialog(dashboard, "Managing users...");
+                    });
+                    dashboard.add(manageUsers);
+
+                    JButton update = new JButton("Update Profile");
+                    update.addActionListener(e -> {
+                        ((Administrator) loggedInUser).updateProfile();
+                    });
+                    dashboard.add(update);
+                }
+
+                JButton logoutBtn = new JButton("Logout");
+                logoutBtn.addActionListener(ev -> {
+                    loggedInUser.logout();
+                    JOptionPane.showMessageDialog(dashboard, "You have been logged out.");
+                    dashboard.dispose();
+                    main(null); // restart the app
+                });
+                dashboard.add(logoutBtn);
+
+                dashboard.setLocationRelativeTo(null);
+                dashboard.setVisible(true);
             }
         });
 
